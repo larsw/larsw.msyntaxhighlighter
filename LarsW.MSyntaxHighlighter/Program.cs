@@ -12,56 +12,53 @@
             string[] IgnoreClassifiers = new string[] { "Whitespace", "Literal" };
             var parser = DynamicParser.LoadFromMgx("M.mgx", "Microsoft.M.MParser");
             using (var sr = new StreamReader("Test.m"))
-            using (var srText = new StreamReader("Test.m"))
+            using (var parseContext = new ParseContext(parser.Lexer,
+                                                       parser.Parser,
+                                                       parser.GraphBuilder,
+                                                       ErrorReporter.Standard,
+                                                       "test.M"))
             {
-                using (var parseContext = new ParseContext(parser.Lexer,
-                                                           parser.Parser,
-                                                           parser.GraphBuilder,
-                                                           ErrorReporter.Standard,
-                                                           "test.M"))
+                var lexerReader = new LexerReader();
+                if (lexerReader.Open(parseContext, sr, true))
                 {
-                    var lexerReader = new LexerReader();
-                    if (lexerReader.Open(parseContext, sr, true))
+                    using (StreamWriter sw = new StreamWriter("output.html"))
                     {
-                        using (StreamWriter sw = new StreamWriter("output.html"))
+                        sw.WriteLine("<html><head><style>body { font-family: Consolas; } .Keyword { font-weight: bold; } .String { color: #336699; }</style></head><body>");
+                        bool eof = false;
+                        while (true)
                         {
-                            sw.WriteLine("<html><head><style>body { font-family: Consolas; } .Keyword { font-weight: bold; } .String { color: #336699; }</style></head><body>");
-                            bool eof = false;
-                            while (true)
+                            var tokens = lexerReader.Read();
+                            foreach (var token in tokens)
                             {
-                                var tokens = lexerReader.Read();
-                                foreach (var token in tokens)
+                                object[] tokenInfos = parser.GetTokenInfo(token.Tag);
+                                ClassificationAttribute classificationAttribute = null;
+                                if (tokenInfos != null && tokenInfos.Length > 0)
                                 {
-                                    object[] tokenInfos = parser.GetTokenInfo(token.Tag);
-                                    ClassificationAttribute classificationAttribute = null;
-                                    if (tokenInfos != null && tokenInfos.Length > 0)
-                                    {
-                                        classificationAttribute = tokenInfos[0] as ClassificationAttribute;
-                                    }
-
-                                    if (token.Description.Equals("EOF"))
-                                    {
-                                        eof = true;
-                                        break;
-                                    }
-                                    if (classificationAttribute != null &&
-                                        !IgnoreClassifiers.Contains(classificationAttribute.Classification))
-                                    {
-                                        sw.Write(string.Format("<span class=\"{0}\">{1}</span>",
-                                            classificationAttribute.Classification,
-                                            token.GetTextString()));
-                                    }
-                                    else
-                                    {
-                                        string output = token.GetTextString().Replace(" ", "&nbsp;").Replace("\r", "<br />");
-                                        sw.Write(output);
-                                    }
+                                    classificationAttribute = tokenInfos[0] as ClassificationAttribute;
                                 }
-                                if (eof)
+
+                                if (token.Description.Equals("EOF"))
+                                {
+                                    eof = true;
                                     break;
+                                }
+                                if (classificationAttribute != null &&
+                                    !IgnoreClassifiers.Contains(classificationAttribute.Classification))
+                                {
+                                    sw.Write(string.Format("<span class=\"{0}\">{1}</span>",
+                                        classificationAttribute.Classification,
+                                        token.GetTextString()));
+                                }
+                                else
+                                {
+                                    string output = token.GetTextString().Replace(" ", "&nbsp;").Replace("\r", "<br />");
+                                    sw.Write(output);
+                                }
                             }
-                            sw.WriteLine("</body></html>");
+                            if (eof)
+                                break;
                         }
+                        sw.WriteLine("</body></html>");
                     }
                 }
                 Console.WriteLine("Output generated.");
