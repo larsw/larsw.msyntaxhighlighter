@@ -31,4 +31,11 @@
     }
     where identity Id;
     Addresses: Address*;
+    
+    Lars: Person
+    {
+        FirstName = "Lars", 
+        LastName = "Wilhelmsen", 
+        EmailAddress = "lars@sral.org"
+    };
 }

@@ -9,9 +9,10 @@
     {
         static void Main(string[] args)
         {
-            string[] IgnoreClassifiers = new string[] { "Whitespace", "Literal" };
-            var parser = DynamicParser.LoadFromMgx("M.mgx", "Microsoft.M.MParser");
-            using (var sr = new StreamReader("Test.m"))
+            string[] IgnoreClassifiers = new string[] { "Whitespace"};
+            //var parser = DynamicParser.LoadFromMgx("M.mgx", "Microsoft.M.MParser");
+            var parser = DynamicParser.LoadFromMgx("Mg.mgx", "Microsoft.M.Grammar.MGrammar");
+            using (var sr = new StreamReader("rockfordauth.mg"))
             using (var parseContext = new ParseContext(parser.Lexer,
                                                        parser.Parser,
                                                        parser.GraphBuilder,
@@ -23,7 +24,7 @@
                 {
                     using (StreamWriter sw = new StreamWriter("output.html"))
                     {
-                        sw.WriteLine("<html><head><style>body { font-family: Consolas; } .Keyword { font-weight: bold; } .String { color: #336699; }</style></head><body>");
+                       sw.WriteLine("<html><head><style>body { background-color: #333333; color: white; font-family: Consolas; } .Delimiter { color: #ddd; } .Keyword { color: #6dcff6; font-weight: bold; } .Literal { color: #10cc20; }</style></head><body>");
                         bool eof = false;
                         while (true)
                         {
@@ -37,7 +38,7 @@
                                     classificationAttribute = tokenInfos[0] as ClassificationAttribute;
                                 }
 
-                                if (token.Description.Equals("EOF"))
+                                if (token.Description.Equals("EOF")) // TODO: Match against the EOF token if its public
                                 {
                                     eof = true;
                                     break;

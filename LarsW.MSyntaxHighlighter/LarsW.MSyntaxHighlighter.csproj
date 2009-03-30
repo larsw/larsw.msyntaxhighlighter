@@ -67,6 +67,9 @@
     <None Include="Mg.mgx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="rockfordauth.mg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Test.m">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
